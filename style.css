@@ -7,7 +7,6 @@
 .grid-container {
 	position: absolute;
 	bottom: 0px;
-	background-color: black;
 	border: 1px solid black;
 	display: grid;
 	width: 100%;
