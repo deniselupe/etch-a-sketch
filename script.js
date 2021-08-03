@@ -1,16 +1,23 @@
-let gridContainer = document.querySelector('.grid-container');
-let squareAreaNumber = 16;
+let gridParent = document.querySelector('.grid-parent');
+let resetButton = document.querySelector('.reset-button')
 
-for (let i = 0; i < squareAreaNumber ** 2; i++) {
-	let gridItem = document.createElement('div');
-	gridItem.classList.add('grid-item');
-	gridContainer.appendChild(gridItem);
+
+function createGridChildren(squareAreaNumber) {
+	for (let i = 0; i < squareAreaNumber ** 2; i++) {
+		let gridChild = document.createElement('div');
+		gridChild.classList.add('grid-child');
+		gridParent.appendChild(gridChild);
+	}
+	
+	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
+	let gridChild = Array.from(document.querySelectorAll('.grid-child'));
+
+	gridChild.forEach((item) => {
+		item.addEventListener('mouseover', function () {
+			item.setAttribute('style', 'background-color: black;');
+		});
+	});
 }
 
-let gridItem = Array.from(document.querySelectorAll('.grid-item'));
+createGridChildren(16);
 
-gridItem.forEach((item) => {
-	item.addEventListener('mouseover', function () {
-		item.setAttribute('style', 'background-color: black;');
-	});
-});
