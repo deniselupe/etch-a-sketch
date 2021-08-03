@@ -1,5 +1,6 @@
 let gridParent = document.querySelector('.grid-parent');
 let resetButton = document.querySelector('.reset-button')
+let clearGridButton = document.querySelector('.reset-button');
 
 
 function createGridChildren(squareAreaNumber) {
@@ -18,6 +19,21 @@ function createGridChildren(squareAreaNumber) {
 		});
 	});
 }
+
+clearGridButton.addEventListener('click', () => {
+	let gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
+	if (gridNum > 100) {
+		alert("Too big of a number, enter a digit less than or equal to 100.");
+		return;
+	}
+
+	let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	for (i of gridChildren) {
+		gridParent.removeChild(i);
+	}
+
+	createGridChildren(gridNum);
+});
 
 createGridChildren(16);
 
