@@ -1,6 +1,6 @@
 let gridParent = document.querySelector('.grid-parent');
 let resetButton = document.querySelector('.reset-button')
-let clearGridButton = document.querySelector('.reset-button');
+let clearGridButton = document.getElementById('reset-button');
 
 
 function createGridChildren(squareAreaNumber) {
