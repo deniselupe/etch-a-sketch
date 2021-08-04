@@ -12,7 +12,7 @@ function createGridChildren(squareAreaNumber) {
 	
 	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
 	let gridChild = Array.from(document.querySelectorAll('.grid-child'));
-
+	
 	gridChild.forEach((item) => {
 		item.addEventListener('mouseover', function () {
 			item.setAttribute('style', 'background-color: black;');

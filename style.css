@@ -1,52 +1,62 @@
 * {
-  font-size: 10px;
-  font-family: 'Roboto', sans-serif;
+	font-size: 10px;
+	font-family: 'Roboto', sans-serif;
 }
 
 html {
-  background: linear-gradient(270deg, #FBB9C5, #FDD0B1, #F9EfC7, #C3EDBF, #BFDFE6, #C5BBDE);
-  background-size: 1200% 1200%;
-  animation: pastelGradient 30s ease infinite;
+  	background: linear-gradient(270deg, #FBB9C5, #FDD0B1, #F9EfC7, #C3EDBF, #BFDFE6, #C5BBDE);
+	background-size: 1200% 1200%;
+	animation: pastelGradient 30s ease infinite;
 }
 
 @keyframes pastelGradient {
-  0% {background-position: 0% 50%}
-  50% {background-position: 100% 50%}
-  100% {background-position: 0% 50%}
+	0% {background-position: 0% 50%}
+	50% {background-position: 100% 50%}
+	100% {background-position: 0% 50%}
+}
+
+h1 {
+	font-family: 'Homemade Apple', cursive;
+	padding: 5rem;
+	margin: 0 auto;
+	border: 1px solid black;
+	font-size: 7rem;
+	font-weight: 300;
+	letter-spacing: .2rem;
 }
 
 .grid-parent {
-  max-width: 600px;
-  height: 600px;
-  margin: 0 auto;
-  border: 1px solid #000;
-  display: grid;
-  grid-gap: 1px 1px;
+	max-width: 600px;
+	height: 600px;
+	margin: 0 auto;
+	border: 1px solid #000;
+	display: grid;
+	grid-gap: 1px 1px;
 }
 
 .grid-child {
-  background-color: #fff;
+	background-color: #fff;
 }
 
 .reset-button {
-  width: 20rem;
-  padding: 1.5rem 2.5rem;
-  margin: 1rem auto;
-  background-color: rgba(0, 0, 0, 0.4);
-  box-shadow: 0px 8px 6px -6px #000;
-  border: none;
-  border-radius: 2.5rem;
-  font-size: 1.5rem;
-  letter-spacing: .2rem;
-  outline: none;
-  display: block;
-  transition: all 0.3s ease 0s;
-  cursor: pointer;
+	width: 20rem;
+	padding: 1.5rem 2.5rem;
+	margin: 1rem auto;
+	background-color: rgba(0, 0, 0, 0.4);
+	box-shadow: 0px 8px 6px -6px #000;
+	border: none;
+	border-radius: 2.5rem;
+	font-size: 1.5rem;
+	letter-spacing: .2rem;
+	outline: none;
+	display: block;
+	transition: all 0.3s ease 0s;
+	cursor: pointer;
 }
 
 .reset-button:hover {
-  box-shadow: 0px 15px 20px #000;
-  text-shadow: 2px 3px 5px rgba(0, 0, 0, 0.4);
-  color: #FFF;
-  transform: translateY(-7px);
+	box-shadow: 0px 15px 20px #000;
+ 	text-shadow: 2px 3px 5px rgba(0, 0, 0, 0.4);
+	color: #FFF;
+	transform: translateY(-7px);
 }
