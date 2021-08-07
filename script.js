@@ -1,6 +1,12 @@
 let gridParent = document.querySelector('.grid-parent');
 let colorSelector = document.getElementById('color-selector');
 let clearGridButton = document.getElementById('reset-button');
+let darkenButton = document.getElementById('darken-button');
+let lightenButton = document.getElementById('lighten-button');
+let rgbButton = document.getElementById('rgb-button');
+let darkenBool = false;
+let lightenBool = false;
+let rgbBool = false;
 let colorChoice = 'rgb(0, 0, 0)';
 
 function createGridChildren(squareAreaNumber) {
