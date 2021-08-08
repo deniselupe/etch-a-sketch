@@ -24,6 +24,8 @@ function createGridChildren(squareAreaNumber) {
 	function coloringRule(event) {
 		event.preventDefault();
 		if (normalColoringBool === true && event.buttons === 1) {
+			let hex = colorSelector.value;
+			colorChoice = hexToRGB(hex);
 			event.target.style.backgroundColor = colorChoice;
 		} else if (darkenBool === true && event.buttons === 1) {
 			let currentRgbValues = event.target.style.backgroundColor;
@@ -45,7 +47,7 @@ function createGridChildren(squareAreaNumber) {
 	
 	gridChild.forEach((item) => {
 		item.addEventListener('mousedown', coloringRule);
-		item.addEventListener('mousemove', coloringRule);
+		item.addEventListener('mouseenter', coloringRule);
 	});
 }
 
