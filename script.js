@@ -41,7 +41,21 @@ function createGridChildren(squareAreaNumber) {
 		} else if (lightenBool === true && event.buttons === 1) {
 			let currentRgbValues = event.target.style.backgroundColor;
 			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-			console.log(currentRgbValues + ' for ligten.');
+			let newRgbValues = [];
+			
+			for (i of currentRgbValues) {
+				let newValue = Math.floor(i * (100 + 10) / 100);
+				if (newValue === 0) newValue = 50;
+				
+				if (newValue < 255) {
+					newRgbValues.push(newValue);
+				} else {
+					newRgbValues.push(255);
+				}
+			}
+
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
 		}
 	}
 	
@@ -88,16 +102,19 @@ colorSelector.addEventListener('change', (event) => {
 clearGridButton.addEventListener('click', () => {
 	let gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
 	if (gridNum > 100) {
-		alert("Too big of a number, enter a digit less than or equal to 100.");
+		alert("Too big of a number. Please enter a number less than or equal to 100.");
+		return;
+	} if (gridNum <= 100) {
+		let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+		for (i of gridChildren) {
+			gridParent.removeChild(i);
+		}
+
+		createGridChildren(gridNum);	
+	} else {
+		alert('Response must be a number less than or equal to 100. Please try again.');
 		return;
 	}
-
-	let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
-	for (i of gridChildren) {
-		gridParent.removeChild(i);
-	}
-
-	createGridChildren(gridNum);
 });
 
 //Darken Button Listener
