@@ -4,6 +4,7 @@ let clearGridButton = document.getElementById('reset-button');
 let darkenButton = document.getElementById('darken-button');
 let lightenButton = document.getElementById('lighten-button');
 let rgbButton = document.getElementById('rgb-button');
+let normalColoringBool = true;
 let darkenBool = false;
 let lightenBool = false;
 let rgbBool = false;
@@ -13,6 +14,7 @@ function createGridChildren(squareAreaNumber) {
 	for (let i = 0; i < squareAreaNumber ** 2; i++) {
 		let gridChild = document.createElement('div');
 		gridChild.classList.add('grid-child');
+		gridChild.style.backgroundColor = 'rgb(255, 255, 255)';
 		gridParent.appendChild(gridChild);
 	}
 	
@@ -21,7 +23,24 @@ function createGridChildren(squareAreaNumber) {
 	
 	function coloringRule(event) {
 		event.preventDefault();
-		if (event.buttons === 1) event.target.style.backgroundColor = colorChoice;
+		if (normalColoringBool === true && event.buttons === 1) {
+			event.target.style.backgroundColor = colorChoice;
+		} else if (darkenBool === true && event.buttons === 1) {
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+			let newRgbValues = [];
+
+			for (i of currentRgbValues) {
+				newRgbValues.push(Math.floor(i * (3/4)));
+			}
+
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
+		} else if (lightenBool === true && event.buttons === 1) {
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+			console.log(currentRgbValues + ' for ligten.');
+		}
 	}
 	
 	gridChild.forEach((item) => {
@@ -53,10 +72,17 @@ function hexToRGB(hex) {
 
 //Color Input Button
 colorSelector.addEventListener('change', (event) => {
+	normalColoringBool = true;
+	darkenBool = false;
+	lightenBool = false;
+	rgbBool = false;
+	darkenButton.classList.remove('active-button');
+	lightenButton.classList.remove('active-button');
+	rgbButton.classList.remove('active-button');
 	colorChoice = hexToRGB(event.target.value);
 });
 
-//Reset Grid Button
+//Reset Grid Button Listener
 clearGridButton.addEventListener('click', () => {
 	let gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
 	if (gridNum > 100) {
@@ -70,6 +96,40 @@ clearGridButton.addEventListener('click', () => {
 	}
 
 	createGridChildren(gridNum);
+});
+
+//Darken Button Listener
+darkenButton.addEventListener( 'click', () => {
+	if (darkenBool === false) {
+		normalColoringBool = false;
+		darkenBool = true;
+		lightenBool = false;
+		rgbBool = false;
+		darkenButton.classList.add('active-button');
+		lightenButton.classList.remove('active-button');
+		rgbButton.classList.remove('active-button');
+	} else if (darkenBool === true) {
+		darkenBool = false;
+		normalColoringBool = true;
+		darkenButton.classList.remove('active-button')
+	}
+});
+
+//Lighten Button Listener
+lightenButton.addEventListener( 'click', () => {
+	if (lightenBool === false) {
+		normalColoringBool = false;
+		darkenBool = false;
+		lightenBool = true;
+		rgbBool = false;
+		darkenButton.classList.remove('active-button');
+		lightenButton.classList.add('active-button');
+		rgbButton.classList.remove('active-button');
+	} else if (lightenBool === true) {
+		lightenBool = false;
+		normalColoringBool = true;
+		lightenButton.classList.remove('active-button')
+	}
 });
 
 createGridChildren(16);
