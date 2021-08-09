@@ -1,9 +1,9 @@
-let gridParent = document.querySelector('.grid-parent');
-let colorSelector = document.getElementById('color-selector');
-let clearGridButton = document.getElementById('reset-button');
-let darkenButton = document.getElementById('darken-button');
-let lightenButton = document.getElementById('lighten-button');
-let rgbButton = document.getElementById('rgb-button');
+const gridParent = document.querySelector('.grid-parent');
+const colorSelector = document.getElementById('color-selector');
+const clearGridButton = document.getElementById('reset-button');
+const darkenButton = document.getElementById('darken-button');
+const lightenButton = document.getElementById('lighten-button');
+const rgbButton = document.getElementById('rgb-button');
 let normalColoringBool = true;
 let darkenBool = false;
 let lightenBool = false;
@@ -12,25 +12,25 @@ let colorChoice = 'rgb(0, 0, 0)';
 
 function createGridChildren(squareAreaNumber) {
 	for (let i = 0; i < squareAreaNumber ** 2; i++) {
-		let gridChild = document.createElement('div');
+		const gridChild = document.createElement('div');
 		gridChild.classList.add('grid-child');
 		gridChild.style.backgroundColor = 'rgb(255, 255, 255)';
 		gridParent.appendChild(gridChild);
 	}
 	
 	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
-	let gridChild = Array.from(document.querySelectorAll('.grid-child'));
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	
 	function coloringRule(event) {
 		event.preventDefault();
 		if (normalColoringBool === true && event.buttons === 1) {
-			let hex = colorSelector.value;
+			const hex = colorSelector.value;
 			colorChoice = hexToRGB(hex);
 			event.target.style.backgroundColor = colorChoice;
 		} else if (darkenBool === true && event.buttons === 1) {
 			let currentRgbValues = event.target.style.backgroundColor;
 			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-			let newRgbValues = [];
+			const newRgbValues = [];
 
 			for (i of currentRgbValues) {
 				newRgbValues.push(Math.floor(i * (4/5)));
@@ -41,7 +41,7 @@ function createGridChildren(squareAreaNumber) {
 		} else if (lightenBool === true && event.buttons === 1) {
 			let currentRgbValues = event.target.style.backgroundColor;
 			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-			let newRgbValues = [];
+			const newRgbValues = [];
 			
 			for (i of currentRgbValues) {
 				let newValue = Math.floor(i * (100 + 20) / 100);
@@ -59,7 +59,7 @@ function createGridChildren(squareAreaNumber) {
 		}
 	}
 	
-	gridChild.forEach((item) => {
+	gridChildren.forEach((item) => {
 		item.addEventListener('mousedown', coloringRule);
 		item.addEventListener('mouseenter', coloringRule);
 	});
@@ -100,12 +100,12 @@ colorSelector.addEventListener('change', (event) => {
 
 //Reset Grid Button Listener
 clearGridButton.addEventListener('click', () => {
-	let gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
+	const gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
 	
 	if (gridNum === null) {
 		return;
 	} else if (gridNum > 0 && gridNum <= 100) {
-		let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+		const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 		for (i of gridChildren) {
 			gridParent.removeChild(i);
 		}
