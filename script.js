@@ -33,7 +33,7 @@ function createGridChildren(squareAreaNumber) {
 			let newRgbValues = [];
 
 			for (i of currentRgbValues) {
-				newRgbValues.push(Math.floor(i * (3/4)));
+				newRgbValues.push(Math.floor(i * (4/5)));
 			}
 
 			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
@@ -44,7 +44,7 @@ function createGridChildren(squareAreaNumber) {
 			let newRgbValues = [];
 			
 			for (i of currentRgbValues) {
-				let newValue = Math.floor(i * (100 + 10) / 100);
+				let newValue = Math.floor(i * (100 + 20) / 100);
 				if (newValue === 0) newValue = 50;
 				
 				if (newValue < 255) {
@@ -101,16 +101,24 @@ colorSelector.addEventListener('change', (event) => {
 //Reset Grid Button Listener
 clearGridButton.addEventListener('click', () => {
 	let gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
-	if (gridNum > 100) {
-		alert("Too big of a number. Please enter a number less than or equal to 100.");
+	
+	if (gridNum === null) {
 		return;
-	} if (gridNum <= 100) {
+	} else if (gridNum > 0 && gridNum <= 100) {
 		let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 		for (i of gridChildren) {
 			gridParent.removeChild(i);
 		}
-
-		createGridChildren(gridNum);	
+		
+		normalColoringBool = true;
+		darkenBool = false;
+		lightenBool = false;
+		rgbBool = false;
+		darkenButton.classList.remove('active-button');
+		lightenButton.classList.remove('active-button');
+		rgbButton.classList.remove('active-button');
+		colorSelector.value = '#000000';
+		createGridChildren(gridNum);
 	} else {
 		alert('Response must be a number less than or equal to 100. Please try again.');
 		return;
