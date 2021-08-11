@@ -4,69 +4,28 @@ const clearGridButton = document.getElementById('reset-button');
 const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
-let normalColoringBool = true;
-let darkenBool = false;
-let lightenBool = false;
-let rgbBool = false;
+let colorOptionSelected = 'normalColoringBool';
 let colorChoice = 'rgb(0, 0, 0)';
-
-function createGridChildren(squareAreaNumber) {
-	for (let i = 0; i < squareAreaNumber ** 2; i++) {
-		const gridChild = document.createElement('div');
-		gridChild.classList.add('grid-child');
-		gridChild.style.backgroundColor = 'rgb(255, 255, 255)';
-		gridParent.appendChild(gridChild);
+let colorOptions = [
+	{
+		name: 'normalColoringBool',
+		value: true,
+		element: null
+	},
+	{
+		name: 'darkenBool',
+		value: false,
+		element: darkenButton
+	},
+	{
+		name: 'lightenBool',
+		value: false,
+		element: lightenButton
 	}
-	
-	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
-	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
-	
-	function coloringRule(event) {
-		event.preventDefault();
-		if (normalColoringBool === true && event.buttons === 1) {
-			const hex = colorSelector.value;
-			colorChoice = hexToRGB(hex);
-			event.target.style.backgroundColor = colorChoice;
-		} else if (darkenBool === true && event.buttons === 1) {
-			let currentRgbValues = event.target.style.backgroundColor;
-			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-			const newRgbValues = [];
-
-			for (i of currentRgbValues) {
-				newRgbValues.push(Math.floor(i * (4/5)));
-			}
-
-			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-			event.target.style.backgroundColor = colorChoice;
-		} else if (lightenBool === true && event.buttons === 1) {
-			let currentRgbValues = event.target.style.backgroundColor;
-			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-			const newRgbValues = [];
-			
-			for (i of currentRgbValues) {
-				let newValue = Math.floor(i * (100 + 20) / 100);
-				if (newValue === 0) newValue = 50;
-				
-				if (newValue < 255) {
-					newRgbValues.push(newValue);
-				} else {
-					newRgbValues.push(255);
-				}
-			}
-
-			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-			event.target.style.backgroundColor = colorChoice;
-		}
-	}
-	
-	gridChildren.forEach((item) => {
-		item.addEventListener('mousedown', coloringRule);
-		item.addEventListener('mouseenter', coloringRule);
-	});
-}
+];
 
 //Hex to RGB Formula
-function hexToRGB(hex) {
+const hexToRGB = function(hex) {
 	let r = 0;
 	let g = 0;
 	let b = 0;
@@ -86,15 +45,91 @@ function hexToRGB(hex) {
 	return `rgb(${+r}, ${+g}, ${+b})`;
 }
 
+//The rules for how each colorOptions button will color the grid
+const coloringRule = function(event) {
+	event.preventDefault();
+	if (colorOptionSelected === 'normalColoringBool' && event.buttons === 1) {
+		const hex = colorSelector.value;
+		colorChoice = hexToRGB(hex);
+		event.target.style.backgroundColor = colorChoice;
+	} else if (colorOptionSelected === 'darkenBool' && event.buttons === 1) {
+		const newRgbValues = [];
+		let currentRgbValues = event.target.style.backgroundColor;
+		currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+		currentRgbValues.forEach((oldValue) => {
+			newRgbValues.push(Math.floor(oldValue * (4/5)));
+		});
+
+		colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+		event.target.style.backgroundColor = colorChoice;
+	} else if (colorOptionSelected === 'lightenBool' && event.buttons === 1) {
+		const newRgbValues = [];
+		let currentRgbValues = event.target.style.backgroundColor;
+		currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+		currentRgbValues.forEach((oldValue) => {
+			let newValue = Math.floor(oldValue * (100 + 20) / 100);
+			if (newValue === 0) newValue = 50;
+
+			if (newValue < 255) {
+				newRgbValues.push(newValue);
+			} else {
+				newRgbValues.push(255);
+			}
+		});
+
+		colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+		event.target.style.backgroundColor = colorChoice;
+	}
+}
+
+//This function is what creates the grid
+const createGridChildren = function(squareAreaNumber) {
+	for (let i = 0; i < squareAreaNumber ** 2; i++) {
+		const gridChild = document.createElement('div');
+		gridChild.classList.add('grid-child');
+		gridChild.style.backgroundColor = 'rgb(255, 255, 255)';
+		gridParent.appendChild(gridChild);
+	}
+	
+	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	
+	gridChildren.forEach((item) => {
+		item.addEventListener('mousedown', coloringRule);
+		item.addEventListener('mouseenter', coloringRule);
+	});
+}
+
+//This function enables/disables grid color options
+const updateColorOptions = function() {
+	let optionIndex = colorOptions.findIndex((option) => option.name === colorOptionSelected);
+	if (colorOptions[optionIndex].value === false) {
+		colorOptions.forEach((option) => {
+			option.value = false;
+			if (option.element) {
+				option.element.classList.remove('active-button');
+			}
+		});
+		colorOptions[optionIndex].value = true;
+		if (colorOptions[optionIndex].element) {
+			colorOptions[optionIndex].element.classList.add('active-button');
+		}
+	} else if (colorOptions[optionIndex].value === true) {
+		colorOptions[optionIndex].value = false;
+		 if (colorOptions[optionIndex].element) {
+			colorOptions[optionIndex].element.classList.remove('active-button');
+		 }
+		colorOptionSelected = 'normalColoringBool';
+		updateColorOptions();
+	}
+}
+
 //Color Input Button
 colorSelector.addEventListener('change', (event) => {
-	normalColoringBool = true;
-	darkenBool = false;
-	lightenBool = false;
-	rgbBool = false;
-	darkenButton.classList.remove('active-button');
-	lightenButton.classList.remove('active-button');
-	rgbButton.classList.remove('active-button');
+	colorOptionSelected = 'normalColoringBool';
+	updateColorOptions();
 	colorChoice = hexToRGB(event.target.value);
 });
 
@@ -106,17 +141,9 @@ clearGridButton.addEventListener('click', () => {
 		return;
 	} else if (gridNum > 0 && gridNum <= 100) {
 		const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
-		for (i of gridChildren) {
-			gridParent.removeChild(i);
-		}
-		
-		normalColoringBool = true;
-		darkenBool = false;
-		lightenBool = false;
-		rgbBool = false;
-		darkenButton.classList.remove('active-button');
-		lightenButton.classList.remove('active-button');
-		rgbButton.classList.remove('active-button');
+		gridChildren.forEach((child) => gridParent.removeChild(child));
+		colorOptionSelected = 'normalColoringBool';
+		updateColorOptions();
 		colorSelector.value = '#000000';
 		createGridChildren(gridNum);
 	} else {
@@ -127,36 +154,14 @@ clearGridButton.addEventListener('click', () => {
 
 //Darken Button Listener
 darkenButton.addEventListener( 'click', () => {
-	if (darkenBool === false) {
-		normalColoringBool = false;
-		darkenBool = true;
-		lightenBool = false;
-		rgbBool = false;
-		darkenButton.classList.add('active-button');
-		lightenButton.classList.remove('active-button');
-		rgbButton.classList.remove('active-button');
-	} else if (darkenBool === true) {
-		darkenBool = false;
-		normalColoringBool = true;
-		darkenButton.classList.remove('active-button')
-	}
+	colorOptionSelected = 'darkenBool';
+	updateColorOptions();
 });
 
 //Lighten Button Listener
 lightenButton.addEventListener( 'click', () => {
-	if (lightenBool === false) {
-		normalColoringBool = false;
-		darkenBool = false;
-		lightenBool = true;
-		rgbBool = false;
-		darkenButton.classList.remove('active-button');
-		lightenButton.classList.add('active-button');
-		rgbButton.classList.remove('active-button');
-	} else if (lightenBool === true) {
-		lightenBool = false;
-		normalColoringBool = true;
-		lightenButton.classList.remove('active-button')
-	}
+	colorOptionSelected = 'lightenBool';
+	updateColorOptions();
 });
 
 createGridChildren(16);
