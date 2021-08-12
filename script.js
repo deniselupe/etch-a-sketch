@@ -21,7 +21,12 @@ let colorOptions = [
 		name: 'lightenBool',
 		value: false,
 		element: lightenButton
-	}
+	},
+	{
+		name: 'rgbBool',
+		value: false,
+		element: rgbButton
+	},
 ];
 
 //Hex to RGB Formula
@@ -48,6 +53,7 @@ const hexToRGB = function(hex) {
 //The rules for how each colorOptions button will color the grid
 const coloringRule = function(event) {
 	event.preventDefault();
+	
 	if (colorOptionSelected === 'normalColoringBool' && event.buttons === 1) {
 		const hex = colorSelector.value;
 		colorChoice = hexToRGB(hex);
@@ -81,6 +87,9 @@ const coloringRule = function(event) {
 
 		colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
 		event.target.style.backgroundColor = colorChoice;
+	} else if (colorOptionSelected === 'rgbBool' && event.buttons === 1) {
+		colorChoice = `hsl(${Math.random() * 360}, 100%, 50%)`;
+		event.target.style.backgroundColor = colorChoice;
 	}
 }
 
@@ -105,22 +114,28 @@ const createGridChildren = function(squareAreaNumber) {
 //This function enables/disables grid color options
 const updateColorOptions = function() {
 	let optionIndex = colorOptions.findIndex((option) => option.name === colorOptionSelected);
+	
 	if (colorOptions[optionIndex].value === false) {
 		colorOptions.forEach((option) => {
 			option.value = false;
+			
 			if (option.element) {
 				option.element.classList.remove('active-button');
 			}
 		});
-		colorOptions[optionIndex].value = true;
+		
 		if (colorOptions[optionIndex].element) {
 			colorOptions[optionIndex].element.classList.add('active-button');
 		}
+		
+		colorOptions[optionIndex].value = true;
 	} else if (colorOptions[optionIndex].value === true) {
 		colorOptions[optionIndex].value = false;
-		 if (colorOptions[optionIndex].element) {
+		 
+		if (colorOptions[optionIndex].element) {
 			colorOptions[optionIndex].element.classList.remove('active-button');
-		 }
+		}
+		
 		colorOptionSelected = 'normalColoringBool';
 		updateColorOptions();
 	}
@@ -161,6 +176,12 @@ darkenButton.addEventListener( 'click', () => {
 //Lighten Button Listener
 lightenButton.addEventListener( 'click', () => {
 	colorOptionSelected = 'lightenBool';
+	updateColorOptions();
+});
+
+//Rainbow Button Listener
+rgbButton.addEventListener('click', () => {
+	colorOptionSelected = 'rgbBool';
 	updateColorOptions();
 });
 
