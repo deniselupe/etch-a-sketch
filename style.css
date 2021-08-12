@@ -137,6 +137,22 @@ label {
 	cursor: pointer;
 }
 
+footer{
+	text-align: center;
+	width: 100vw;
+	margin-top: 1.5rem;
+}
+
+footer p {
+	font-size: 2rem;
+	letter-spacing: .2rem;
+}
+
+.footer-link {
+	font-size: 2rem;
+	letter-spacing: .2rem;
+}
+
 @media only screen and (max-width: 880px) {
 	h1 {
 		padding: 0 5rem 0 5rem;
