@@ -4,6 +4,7 @@ const clearGridButton = document.getElementById('reset-button');
 const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
+let historicalColoring = [];
 let colorOptionSelected = 'normalColoringBool';
 let colorChoice = 'rgb(0, 0, 0)';
 let colorOptions = [
@@ -52,44 +53,57 @@ const hexToRGB = function(hex) {
 
 //The rules for how each colorOptions button will color the grid
 const coloringRule = function(event) {
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	const index = gridChildren.indexOf(event.target);
+	const childObj = {};
 	event.preventDefault();
 	
-	if (colorOptionSelected === 'normalColoringBool' && event.buttons === 1) {
-		const hex = colorSelector.value;
-		colorChoice = hexToRGB(hex);
-		event.target.style.backgroundColor = colorChoice;
-	} else if (colorOptionSelected === 'darkenBool' && event.buttons === 1) {
-		const newRgbValues = [];
-		let currentRgbValues = event.target.style.backgroundColor;
-		currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+	if (event.type === 'mousedown') historicalColoring = [];
+	
+	if (event.buttons === 1) {
+		childObj.index = index;
+		childObj.originalColor = event.target.style.backgroundColor;
 
-		currentRgbValues.forEach((oldValue) => {
-			newRgbValues.push(Math.floor(oldValue * (4/5)));
-		});
+		if (colorOptionSelected === 'normalColoringBool') {
+			const hex = colorSelector.value;
+			colorChoice = hexToRGB(hex);
+			event.target.style.backgroundColor = colorChoice;
+		} else if (colorOptionSelected === 'darkenBool') {
+			const newRgbValues = [];
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
 
-		colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-		event.target.style.backgroundColor = colorChoice;
-	} else if (colorOptionSelected === 'lightenBool' && event.buttons === 1) {
-		const newRgbValues = [];
-		let currentRgbValues = event.target.style.backgroundColor;
-		currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+			currentRgbValues.forEach((oldValue) => {
+				newRgbValues.push(Math.floor(oldValue * (4/5)));
+			});
 
-		currentRgbValues.forEach((oldValue) => {
-			let newValue = Math.floor(oldValue * (100 + 20) / 100);
-			if (newValue === 0) newValue = 50;
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
+		} else if (colorOptionSelected === 'lightenBool') {
+			const newRgbValues = [];
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
 
-			if (newValue < 255) {
-				newRgbValues.push(newValue);
-			} else {
-				newRgbValues.push(255);
-			}
-		});
+			currentRgbValues.forEach((oldValue) => {
+				let newValue = Math.floor(oldValue * (100 + 20) / 100);
+				if (newValue === 0) newValue = 50;
 
-		colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-		event.target.style.backgroundColor = colorChoice;
-	} else if (colorOptionSelected === 'rgbBool' && event.buttons === 1) {
-		colorChoice = `hsl(${Math.random() * 360}, 100%, 50%)`;
-		event.target.style.backgroundColor = colorChoice;
+				if (newValue < 255) {
+					newRgbValues.push(newValue);
+				} else {
+					newRgbValues.push(255);
+				}
+			});
+
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
+		} else if (colorOptionSelected === 'rgbBool') {
+			colorChoice = `hsl(${Math.random() * 360}, 100%, 50%)`;
+			event.target.style.backgroundColor = colorChoice;
+		}
+		
+		childObj.newColor = event.target.style.backgroundColor;
+		historicalColoring.push(childObj);
 	}
 }
 
