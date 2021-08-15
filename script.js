@@ -1,6 +1,7 @@
 const gridParent = document.querySelector('.grid-parent');
 const colorSelector = document.getElementById('color-selector');
 const clearGridButton = document.getElementById('reset-button');
+const undoButton = document.getElementById('undo-button');
 const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
@@ -55,6 +56,8 @@ const hexToRGB = function(hex) {
 const coloringRule = function(event) {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	const index = gridChildren.indexOf(event.target);
+	const duplicateChildTest = (child) => child.index === index;
+	const isChildDuplicate = historicalColoring.some(duplicateChildTest);
 	const childObj = {};
 	event.preventDefault();
 	
@@ -98,12 +101,12 @@ const coloringRule = function(event) {
 			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
 			event.target.style.backgroundColor = colorChoice;
 		} else if (colorOptionSelected === 'rgbBool') {
-			colorChoice = `hsl(${Math.random() * 360}, 100%, 50%)`;
+			colorChoice = `hsl(${Math.ceil(Math.random() * 360)}, 100%, 50%)`;
 			event.target.style.backgroundColor = colorChoice;
 		}
 		
 		childObj.newColor = event.target.style.backgroundColor;
-		historicalColoring.push(childObj);
+		if (isChildDuplicate === false) historicalColoring.push(childObj);
 	}
 }
 
@@ -171,6 +174,7 @@ clearGridButton.addEventListener('click', () => {
 	} else if (gridNum > 0 && gridNum <= 100) {
 		const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 		gridChildren.forEach((child) => gridParent.removeChild(child));
+		historicalColoring = [];
 		colorOptionSelected = 'normalColoringBool';
 		updateColorOptions();
 		colorSelector.value = '#000000';
@@ -179,6 +183,15 @@ clearGridButton.addEventListener('click', () => {
 		alert('Response must be a number less than or equal to 100. Please try again.');
 		return;
 	}
+});
+
+//Undo Button Listener
+undoButton.addEventListener('click', () => {
+	let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	
+	historicalColoring.forEach((child) => {
+		gridChildren[child.index].style.backgroundColor = child.originalColor;
+	});
 });
 
 //Darken Button Listener
