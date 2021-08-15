@@ -1,6 +1,7 @@
 const gridParent = document.querySelector('.grid-parent');
 const colorSelector = document.getElementById('color-selector');
 const clearGridButton = document.getElementById('reset-button');
+const gridLinesButton = document.getElementById('grid-lines-button');
 const undoButton = document.getElementById('undo-button');
 const redoButton = document.getElementById('redo-button');
 const darkenButton = document.getElementById('darken-button');
@@ -120,7 +121,8 @@ const createGridChildren = function(squareAreaNumber) {
 		gridParent.appendChild(gridChild);
 	}
 	
-	gridParent.style.gridTemplate = `repeat(${squareAreaNumber}, 1fr) / repeat(${squareAreaNumber}, 1fr)`;
+	gridParent.style.gridTemplateRows = `repeat(${squareAreaNumber}, 1fr)`;
+	gridParent.style.gridTemplateColumns = `repeat(${squareAreaNumber}, 1fr)`;
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	
 	gridChildren.forEach((item) => {
@@ -183,6 +185,17 @@ clearGridButton.addEventListener('click', () => {
 	} else {
 		alert('Response must be a number less than or equal to 100. Please try again.');
 		return;
+	}
+});
+
+//Grid Lines Button Listener
+gridLinesButton.addEventListener('click', () => {
+	if (!gridParent.style.gap) {
+		gridParent.style.gap = '0px';
+		gridLinesButton.textContent = 'Grid Lines: Off';
+	} else {
+		gridParent.style.gap = '';
+		gridLinesButton.textContent = 'Grid Lines: On';
 	}
 });
 
