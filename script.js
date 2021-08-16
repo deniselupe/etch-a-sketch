@@ -1,5 +1,6 @@
 const gridParent = document.querySelector('.grid-parent');
-const colorSelector = document.getElementById('color-selector');
+const drawingColorSelector = document.getElementById('drawing-color');
+const backgroundFillSelector = document.getElementById('background-fill');
 const clearGridButton = document.getElementById('reset-button');
 const gridLinesButton = document.getElementById('grid-lines-button');
 const undoButton = document.getElementById('undo-button');
@@ -8,11 +9,12 @@ const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
 let historicalColoring = [];
-let colorOptionSelected = 'normalColoringBool';
+let backgroundColor = 'rgb(255, 255, 255)';
+let colorOptionSelected = 'drawingColorBool';
 let colorChoice = 'rgb(0, 0, 0)';
 let colorOptions = [
 	{
-		name: 'normalColoringBool',
+		name: 'drawingColorBool',
 		value: true,
 		element: null
 	},
@@ -64,13 +66,13 @@ const coloringRule = function(event) {
 	const isChildDuplicate = historicalColoring.some(duplicateChildTest);
 	const childObj = {};
 	event.preventDefault();
-	
+
 	if (event.buttons === 1) {
 		childObj.index = index;
 		childObj.originalColor = event.target.style.backgroundColor;
-
-		if (colorOptionSelected === 'normalColoringBool') {
-			const hex = colorSelector.value;
+		
+		if (colorOptionSelected === 'drawingColorBool') {
+			const hex = drawingColorSelector.value;
 			colorChoice = hexToRGB(hex);
 			event.target.style.backgroundColor = colorChoice;
 		} else if (colorOptionSelected === 'darkenBool') {
@@ -90,7 +92,7 @@ const coloringRule = function(event) {
 			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
 
 			currentRgbValues.forEach((oldValue) => {
-				let newValue = Math.floor(oldValue * (100 + 20) / 100);
+				let newValue = Math.ceil(oldValue * (100 + 20) / 100);
 				if (newValue === 0) newValue = 50;
 
 				if (newValue < 255) {
@@ -133,7 +135,7 @@ const createGridChildren = function(squareAreaNumber) {
 
 //This function enables/disables grid color options
 const updateColorOptions = function() {
-	let optionIndex = colorOptions.findIndex((option) => option.name === colorOptionSelected);
+	const optionIndex = colorOptions.findIndex((option) => option.name === colorOptionSelected);
 	
 	if (colorOptions[optionIndex].value === false) {
 		colorOptions.forEach((option) => {
@@ -156,16 +158,29 @@ const updateColorOptions = function() {
 			colorOptions[optionIndex].element.classList.remove('active-button');
 		}
 		
-		colorOptionSelected = 'normalColoringBool';
+		colorOptionSelected = 'drawingColorBool';
 		updateColorOptions();
 	}
 }
 
-//Color Input Button
-colorSelector.addEventListener('change', (event) => {
-	colorOptionSelected = 'normalColoringBool';
+//Drawing Color Input Listener
+drawingColorSelector.addEventListener('change', (event) => {
+	colorOptionSelected = 'drawingColorBool';
 	updateColorOptions();
-	colorChoice = hexToRGB(event.target.value);
+});
+
+//Background Fill Color Input Listener
+backgroundFillSelector.addEventListener('change', (event) => {
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	newBackgroundColor = hexToRGB(backgroundFillSelector.value);
+	
+	gridChildren.forEach((child) => {
+		if (child.style.backgroundColor === backgroundColor) {
+			child.style.backgroundColor = newBackgroundColor;
+		}
+	});
+	
+	backgroundColor = newBackgroundColor;
 });
 
 //Reset Grid Button Listener
@@ -178,9 +193,11 @@ clearGridButton.addEventListener('click', () => {
 		const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 		gridChildren.forEach((child) => gridParent.removeChild(child));
 		historicalColoring = [];
-		colorOptionSelected = 'normalColoringBool';
+		drawingColorSelector.value = '#000000';
+		backgroundFillSelector.value = '#FFFFFF';
+		backgroundColor = 'rgb(255, 255, 255)';
+		colorOptionSelected = 'drawingColorBool';
 		updateColorOptions();
-		colorSelector.value = '#000000';
 		createGridChildren(gridNum);
 	} else {
 		alert('Response must be a number less than or equal to 100. Please try again.');
@@ -201,7 +218,7 @@ gridLinesButton.addEventListener('click', () => {
 
 //Undo Button Listener
 undoButton.addEventListener('click', () => {
-	let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	
 	historicalColoring.forEach((child) => {
 		gridChildren[child.index].style.backgroundColor = child.originalColor;
@@ -210,7 +227,7 @@ undoButton.addEventListener('click', () => {
 
 //Redo Button Listener
 redoButton.addEventListener('click', () => {
-	let gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	
 	historicalColoring.forEach((child) => {
 		gridChildren[child.index].style.backgroundColor = child.newColor;
