@@ -7,6 +7,7 @@ const eraserButton = document.getElementById('eraser-button');
 const gridLinesButton = document.getElementById('grid-lines-button');
 const undoButton = document.getElementById('undo-button');
 const redoButton = document.getElementById('redo-button');
+const colorPickButton = document.getElementById('color-pick-button');
 const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
@@ -24,6 +25,11 @@ let colorOptions = [
 		name: 'eraserBool',
 		value: false,
 		element: eraserButton
+	},
+	{
+		name: 'colorPickerBool',
+		value: false,
+		element: colorPickButton
 	},
 	{
 		name: 'darkenBool',
@@ -84,6 +90,27 @@ const coloringRule = function(event) {
 			event.target.style.backgroundColor = colorChoice;
 		} else if (colorOptionSelected === 'eraserBool') {
 			event.target.style.backgroundColor = backgroundColor;
+		} else if (colorOptionSelected === 'colorPickerBool') {
+			let currentRgbValues = event.target.style.backgroundColor;
+			let hexValues = [];
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+			currentRgbValues.forEach((value) => {
+				let hex = parseInt(value);
+				hex = hex.toString(16);
+
+				if (hex.length === 1) {
+					hex = '0' + hex;
+				}
+
+				hexValues.push(hex);
+			});
+
+			hexValues = hexValues.join('');
+			hexValues = `#${hexValues}`;
+			drawingColorSelector.value = hexValues;
+			colorOptionSelected = 'drawingColorBool';
+			updateColorOptions();
 		} else if (colorOptionSelected === 'darkenBool') {
 			const newRgbValues = [];
 			let currentRgbValues = event.target.style.backgroundColor;
@@ -101,8 +128,8 @@ const coloringRule = function(event) {
 			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
 
 			currentRgbValues.forEach((oldValue) => {
-				let newValue = Math.ceil(oldValue * (100 + 20) / 100);
-				if (newValue === 0) newValue = 50;
+				if (oldValue < 5) oldValue = 50;
+				let newValue = Math.ceil(oldValue * (100 + 45) / 100);
 
 				if (newValue < 255) {
 					newRgbValues.push(newValue);
@@ -253,6 +280,12 @@ redoButton.addEventListener('click', () => {
 	historicalColoring.forEach((child) => {
 		gridChildren[child.index].style.backgroundColor = child.newColor;
 	});
+});
+
+//Color Picker Button Listener
+colorPickButton.addEventListener('click', () => {
+	colorOptionSelected = 'colorPickerBool';
+	updateColorOptions();
 });
 
 //Darken Button Listener
