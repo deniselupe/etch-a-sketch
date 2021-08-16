@@ -1,7 +1,8 @@
 const gridParent = document.querySelector('.grid-parent');
 const drawingColorSelector = document.getElementById('drawing-color');
 const backgroundFillSelector = document.getElementById('background-fill');
-const clearGridButton = document.getElementById('reset-button');
+const resetGridButton = document.getElementById('reset-button');
+const clearGridButton = document.getElementById('clear-button');
 const gridLinesButton = document.getElementById('grid-lines-button');
 const undoButton = document.getElementById('undo-button');
 const redoButton = document.getElementById('redo-button');
@@ -184,7 +185,7 @@ backgroundFillSelector.addEventListener('change', (event) => {
 });
 
 //Reset Grid Button Listener
-clearGridButton.addEventListener('click', () => {
+resetGridButton.addEventListener('click', () => {
 	const gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
 	
 	if (gridNum === null) {
@@ -203,6 +204,12 @@ clearGridButton.addEventListener('click', () => {
 		alert('Response must be a number less than or equal to 100. Please try again.');
 		return;
 	}
+});
+
+//Clear Grid Button Listener;
+clearGridButton.addEventListener('click', () => {
+	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	gridChildren.forEach((child) => child.style.backgroundColor = backgroundColor);
 });
 
 //Grid Lines Button Listener
