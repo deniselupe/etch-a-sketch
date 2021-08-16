@@ -3,6 +3,7 @@ const drawingColorSelector = document.getElementById('drawing-color');
 const backgroundFillSelector = document.getElementById('background-fill');
 const resetGridButton = document.getElementById('reset-button');
 const clearGridButton = document.getElementById('clear-button');
+const eraserButton = document.getElementById('eraser-button');
 const gridLinesButton = document.getElementById('grid-lines-button');
 const undoButton = document.getElementById('undo-button');
 const redoButton = document.getElementById('redo-button');
@@ -18,6 +19,11 @@ let colorOptions = [
 		name: 'drawingColorBool',
 		value: true,
 		element: null
+	},
+	{
+		name: 'eraserBool',
+		value: false,
+		element: eraserButton
 	},
 	{
 		name: 'darkenBool',
@@ -76,6 +82,8 @@ const coloringRule = function(event) {
 			const hex = drawingColorSelector.value;
 			colorChoice = hexToRGB(hex);
 			event.target.style.backgroundColor = colorChoice;
+		} else if (colorOptionSelected === 'eraserBool') {
+			event.target.style.backgroundColor = backgroundColor;
 		} else if (colorOptionSelected === 'darkenBool') {
 			const newRgbValues = [];
 			let currentRgbValues = event.target.style.backgroundColor;
@@ -210,6 +218,12 @@ resetGridButton.addEventListener('click', () => {
 clearGridButton.addEventListener('click', () => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	gridChildren.forEach((child) => child.style.backgroundColor = backgroundColor);
+});
+
+//Eraser Button Listener
+eraserButton.addEventListener('click', () => {
+	colorOptionSelected = 'eraserBool';
+	updateColorOptions();
 });
 
 //Grid Lines Button Listener
