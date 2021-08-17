@@ -11,7 +11,9 @@ const colorPickButton = document.getElementById('color-pick-button');
 const darkenButton = document.getElementById('darken-button');
 const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
+let drawingInstance = [];
 let historicalColoring = [];
+let undoNumber = 0;
 let backgroundColor = 'rgb(255, 255, 255)';
 let colorOptionSelected = 'drawingColorBool';
 let colorChoice = 'rgb(0, 0, 0)';
@@ -69,9 +71,18 @@ const hexToRGB = function(hex) {
 	return `rgb(${+r}, ${+g}, ${+b})`;
 }
 
+/*This refreshes the historialColoring array so that it only carries 
+the 5 most recent drawing actions at a time */
+const refreshHistorical = function () {
+	if (drawingInstance.length > 0) {
+		historicalColoring.unshift(drawingInstance);
+		drawingInstance = [];
+	}
+};
+
 //The rules for how each colorOptions button will color the grid
 const coloringRule = function(event) {
-	if (event.type === 'mousedown') historicalColoring = [];
+	if (event.type === 'mousedown') refreshHistorical();
 	
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	const index = gridChildren.indexOf(event.target);
@@ -146,7 +157,7 @@ const coloringRule = function(event) {
 		}
 		
 		childObj.newColor = event.target.style.backgroundColor;
-		if (isChildDuplicate === false) historicalColoring.push(childObj);
+		if (isChildDuplicate === false) drawingInstance.push(childObj);
 	}
 }
 
@@ -267,10 +278,13 @@ gridLinesButton.addEventListener('click', () => {
 //Undo Button Listener
 undoButton.addEventListener('click', () => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
+	refreshHistorical();
 	
-	historicalColoring.forEach((child) => {
+	historicalColoring[undoNumber].forEach((child) => {
 		gridChildren[child.index].style.backgroundColor = child.originalColor;
 	});
+
+	if (undoNumber < historicalColoring.length - 1) undoNumber = undoNumber + 1;
 });
 
 //Redo Button Listener
