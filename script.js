@@ -210,11 +210,20 @@ const updateColorOptions = function() {
 	}
 }
 
-//Drawing Color Input Listener
-drawingColorSelector.addEventListener('change', (event) => {
-	colorOptionSelected = 'drawingColorBool';
-	updateColorOptions();
-});
+//Assigns an Event Listener to buttons listed in colorOptions array
+const eventButton = (button, selectedName, eventType) => {
+	button.addEventListener(eventType, () => {
+		colorOptionSelected = selectedName;
+		updateColorOptions();
+	});
+};
+
+eventButton(drawingColorSelector, 'drawingColorBool', 'change');
+eventButton(eraserButton, 'eraserBool', 'click');
+eventButton(colorPickButton, 'colorPickerBool', 'click');
+eventButton(darkenButton, 'darkenBool', 'click');
+eventButton(lightenButton, 'lightenBool', 'click');
+eventButton(rgbButton, 'rgbBool', 'click');
 
 //Background Fill Color Input Listener
 backgroundFillSelector.addEventListener('change', (event) => {
@@ -258,12 +267,6 @@ clearGridButton.addEventListener('click', () => {
 	gridChildren.forEach((child) => child.style.backgroundColor = backgroundColor);
 });
 
-//Eraser Button Listener
-eraserButton.addEventListener('click', () => {
-	colorOptionSelected = 'eraserBool';
-	updateColorOptions();
-});
-
 //Grid Lines Button Listener
 gridLinesButton.addEventListener('click', () => {
 	if (!gridParent.style.gap) {
@@ -294,30 +297,6 @@ redoButton.addEventListener('click', () => {
 	historicalColoring.forEach((child) => {
 		gridChildren[child.index].style.backgroundColor = child.newColor;
 	});
-});
-
-//Color Picker Button Listener
-colorPickButton.addEventListener('click', () => {
-	colorOptionSelected = 'colorPickerBool';
-	updateColorOptions();
-});
-
-//Darken Button Listener
-darkenButton.addEventListener( 'click', () => {
-	colorOptionSelected = 'darkenBool';
-	updateColorOptions();
-});
-
-//Lighten Button Listener
-lightenButton.addEventListener( 'click', () => {
-	colorOptionSelected = 'lightenBool';
-	updateColorOptions();
-});
-
-//Rainbow Button Listener
-rgbButton.addEventListener('click', () => {
-	colorOptionSelected = 'rgbBool';
-	updateColorOptions();
 });
 
 createGridChildren(16);
