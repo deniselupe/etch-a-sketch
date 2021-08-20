@@ -71,8 +71,7 @@ const hexToRGB = function(hex) {
 	return `rgb(${+r}, ${+g}, ${+b})`;
 }
 
-/*This refreshes the historialColoring array so that it only carries 
-the 5 most recent drawing actions at a time */
+//This is what pushes a coloring instance into the historicalColoring array
 const refreshHistorical = function () {
 	if (drawingInstance.length > 0) {
 		historicalColoring.unshift(drawingInstance);
@@ -82,12 +81,19 @@ const refreshHistorical = function () {
 
 //The rules for how each colorOptions button will color the grid
 const coloringRule = function(event) {
-	if (event.type === 'mousedown') refreshHistorical();
+	if (event.type === 'mousedown') {
+		refreshHistorical();
+		
+		if (undoNumber > 0) {
+			historicalColoring = historicalColoring.slice(undoNumber);
+			undoNumber = 0;
+		}
+	}
 	
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	const index = gridChildren.indexOf(event.target);
 	const duplicateChildTest = (child) => child.index === index;
-	const isChildDuplicate = historicalColoring.some(duplicateChildTest);
+	const isChildDuplicate = drawingInstance.some(duplicateChildTest);
 	const childObj = {};
 	event.preventDefault();
 
@@ -229,13 +235,60 @@ eventButton(rgbButton, 'rgbBool', 'click');
 backgroundFillSelector.addEventListener('change', (event) => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	newBackgroundColor = hexToRGB(backgroundFillSelector.value);
+	refreshHistorical();
 	
-	gridChildren.forEach((child) => {
+	if (undoNumber > 0) {
+		historicalColoring = historicalColoring.slice(undoNumber);
+		undoNumber = 0;
+	}
+	
+	gridChildren.forEach((child, index) => {
 		if (child.style.backgroundColor === backgroundColor) {
+			const childObj = {};
+			childObj.index = index;
+			childObj.originalColor = child.style.backgroundColor;
 			child.style.backgroundColor = newBackgroundColor;
+			childObj.newColor = child.style.backgroundColor;
+			childObj.oldBackgroundFill = function (){
+				backgroundColor = childObj.originalColor;
+				let currentRgbValues = childObj.originalColor;
+				let hexValues = [];
+				currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+				currentRgbValues.forEach((value) => {
+					let hex = parseInt(value);
+					hex = hex.toString(16);
+
+					if (hex.length === 1) hex = '0' + hex;
+					hexValues.push(hex);
+				});
+
+				hexValues = hexValues.join('');
+				hexValues = `#${hexValues}`;
+				backgroundFillSelector.value = hexValues;
+			};
+			childObj.newBackgroundFill = function () {
+				backgroundColor = childObj.newColor;
+				let currentRgbValues = childObj.newColor;
+				let hexValues = [];
+				currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+				currentRgbValues.forEach((value) => {
+					let hex = parseInt(value);
+					hex = hex.toString(16);
+
+					if (hex.length === 1) hex = '0' + hex;
+					hexValues.push(hex);
+				});
+
+				hexValues = hexValues.join('');
+				hexValues = `#${hexValues}`;
+				backgroundFillSelector.value = hexValues;
+			};
+			drawingInstance.push(childObj);
 		}
 	});
-	
+
 	backgroundColor = newBackgroundColor;
 });
 
@@ -249,6 +302,8 @@ resetGridButton.addEventListener('click', () => {
 		const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 		gridChildren.forEach((child) => gridParent.removeChild(child));
 		historicalColoring = [];
+		drawingInstance = [];
+		undoNumber = 0;
 		drawingColorSelector.value = '#000000';
 		backgroundFillSelector.value = '#FFFFFF';
 		backgroundColor = 'rgb(255, 255, 255)';
@@ -264,7 +319,23 @@ resetGridButton.addEventListener('click', () => {
 //Clear Grid Button Listener;
 clearGridButton.addEventListener('click', () => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
-	gridChildren.forEach((child) => child.style.backgroundColor = backgroundColor);
+	refreshHistorical();
+	
+	if (undoNumber > 0) {
+		historicalColoring = historicalColoring.slice(undoNumber);
+		undoNumber = 0;
+	}
+	
+	gridChildren.forEach((child, index) => {
+		if (child.style.backgroundColor !== backgroundColor) {
+			const childObj = {};
+			childObj.index = index;
+			childObj.originalColor = child.style.backgroundColor;
+			child.style.backgroundColor = backgroundColor;
+			childObj.newColor = child.style.backgroundColor;
+			drawingInstance.push(childObj);
+		}
+	});
 });
 
 //Grid Lines Button Listener
@@ -283,20 +354,30 @@ undoButton.addEventListener('click', () => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	refreshHistorical();
 	
-	historicalColoring[undoNumber].forEach((child) => {
-		gridChildren[child.index].style.backgroundColor = child.originalColor;
-	});
-
-	if (undoNumber < historicalColoring.length - 1) undoNumber = undoNumber + 1;
+	if (undoNumber < historicalColoring.length) {
+		historicalColoring[undoNumber].forEach((child) => {
+			gridChildren[child.index].style.backgroundColor = child.originalColor;
+			
+			if (child.oldBackgroundFill) child.oldBackgroundFill();
+		});
+		
+		undoNumber = undoNumber + 1;
+	}
 });
 
 //Redo Button Listener
 redoButton.addEventListener('click', () => {
 	const gridChildren = Array.from(document.querySelectorAll('.grid-child'));
 	
-	historicalColoring.forEach((child) => {
-		gridChildren[child.index].style.backgroundColor = child.newColor;
-	});
+	if (undoNumber > 0) {
+		undoNumber = undoNumber - 1;
+		
+		historicalColoring[undoNumber].forEach((child) => {
+			gridChildren[child.index].style.backgroundColor = child.newColor;
+			
+			if (child.newBackgroundFill) child.newBackgroundFill();
+		});
+	}
 });
 
 createGridChildren(16);
