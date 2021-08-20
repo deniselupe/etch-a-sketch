@@ -15,38 +15,102 @@ let drawingInstance = [];
 let historicalColoring = [];
 let undoNumber = 0;
 let backgroundColor = 'rgb(255, 255, 255)';
-let colorOptionSelected = 'drawingColorBool';
 let colorChoice = 'rgb(0, 0, 0)';
+
 let colorOptions = [
 	{
 		name: 'drawingColorBool',
 		value: true,
-		element: null
+		element: null,
+		colorRule: function() {
+			const hex = drawingColorSelector.value;
+			colorChoice = hexToRGB(hex);
+			event.target.style.backgroundColor = colorChoice;
+		}
 	},
 	{
 		name: 'eraserBool',
 		value: false,
-		element: eraserButton
+		element: eraserButton,
+		colorRule: function() {
+			event.target.style.backgroundColor = backgroundColor;
+		}
 	},
 	{
 		name: 'colorPickerBool',
 		value: false,
-		element: colorPickButton
+		element: colorPickButton,
+		colorRule: function() {
+			let currentRgbValues = event.target.style.backgroundColor;
+			let hexValues = [];
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+			currentRgbValues.forEach((value) => {
+				let hex = parseInt(value);
+				hex = hex.toString(16);
+
+				if (hex.length === 1) {
+					hex = '0' + hex;
+				}
+
+				hexValues.push(hex);
+			});
+
+			hexValues = hexValues.join('');
+			hexValues = `#${hexValues}`;
+			drawingColorSelector.value = hexValues;
+			updateColorOptions('drawingColorBool');
+		}
 	},
 	{
 		name: 'darkenBool',
 		value: false,
-		element: darkenButton
+		element: darkenButton,
+		colorRule: function() {
+			const newRgbValues = [];
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+			currentRgbValues.forEach((oldValue) => {
+				newRgbValues.push(Math.floor(oldValue * (4/5)));
+			});
+
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
+		}
 	},
 	{
 		name: 'lightenBool',
 		value: false,
-		element: lightenButton
+		element: lightenButton,
+		colorRule: function() {
+			const newRgbValues = [];
+			let currentRgbValues = event.target.style.backgroundColor;
+			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+
+			currentRgbValues.forEach((oldValue) => {
+				if (oldValue < 5) oldValue = 50;
+				let newValue = Math.ceil(oldValue * (100 + 45) / 100);
+
+				if (newValue < 255) {
+					newRgbValues.push(newValue);
+				} else {
+					newRgbValues.push(255);
+				}
+			});
+
+			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
+			event.target.style.backgroundColor = colorChoice;
+		}
 	},
 	{
 		name: 'rgbBool',
 		value: false,
-		element: rgbButton
+		element: rgbButton,
+		colorRule: function() {
+			colorChoice = `hsl(${Math.ceil(Math.random() * 360)}, 100%, 50%)`;
+			event.target.style.backgroundColor = colorChoice;
+		}
 	},
 ];
 
@@ -98,70 +162,10 @@ const coloringRule = function(event) {
 	event.preventDefault();
 
 	if (event.buttons === 1) {
+		const ruleIndex = colorOptions.findIndex((option) => option.value === true);
 		childObj.index = index;
 		childObj.originalColor = event.target.style.backgroundColor;
-		
-		if (colorOptionSelected === 'drawingColorBool') {
-			const hex = drawingColorSelector.value;
-			colorChoice = hexToRGB(hex);
-			event.target.style.backgroundColor = colorChoice;
-		} else if (colorOptionSelected === 'eraserBool') {
-			event.target.style.backgroundColor = backgroundColor;
-		} else if (colorOptionSelected === 'colorPickerBool') {
-			let currentRgbValues = event.target.style.backgroundColor;
-			let hexValues = [];
-			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-
-			currentRgbValues.forEach((value) => {
-				let hex = parseInt(value);
-				hex = hex.toString(16);
-
-				if (hex.length === 1) {
-					hex = '0' + hex;
-				}
-
-				hexValues.push(hex);
-			});
-
-			hexValues = hexValues.join('');
-			hexValues = `#${hexValues}`;
-			drawingColorSelector.value = hexValues;
-			colorOptionSelected = 'drawingColorBool';
-			updateColorOptions();
-		} else if (colorOptionSelected === 'darkenBool') {
-			const newRgbValues = [];
-			let currentRgbValues = event.target.style.backgroundColor;
-			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-
-			currentRgbValues.forEach((oldValue) => {
-				newRgbValues.push(Math.floor(oldValue * (4/5)));
-			});
-
-			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-			event.target.style.backgroundColor = colorChoice;
-		} else if (colorOptionSelected === 'lightenBool') {
-			const newRgbValues = [];
-			let currentRgbValues = event.target.style.backgroundColor;
-			currentRgbValues = currentRgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
-
-			currentRgbValues.forEach((oldValue) => {
-				if (oldValue < 5) oldValue = 50;
-				let newValue = Math.ceil(oldValue * (100 + 45) / 100);
-
-				if (newValue < 255) {
-					newRgbValues.push(newValue);
-				} else {
-					newRgbValues.push(255);
-				}
-			});
-
-			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
-			event.target.style.backgroundColor = colorChoice;
-		} else if (colorOptionSelected === 'rgbBool') {
-			colorChoice = `hsl(${Math.ceil(Math.random() * 360)}, 100%, 50%)`;
-			event.target.style.backgroundColor = colorChoice;
-		}
-		
+		colorOptions[ruleIndex].colorRule();
 		childObj.newColor = event.target.style.backgroundColor;
 		if (isChildDuplicate === false) drawingInstance.push(childObj);
 	}
@@ -187,8 +191,8 @@ const createGridChildren = function(squareAreaNumber) {
 }
 
 //This function enables/disables grid color options
-const updateColorOptions = function() {
-	const optionIndex = colorOptions.findIndex((option) => option.name === colorOptionSelected);
+const updateColorOptions = function (optionSelected) {
+	const optionIndex = colorOptions.findIndex((option) => option.name === optionSelected);
 	
 	if (colorOptions[optionIndex].value === false) {
 		colorOptions.forEach((option) => {
@@ -210,17 +214,15 @@ const updateColorOptions = function() {
 		if (colorOptions[optionIndex].element) {
 			colorOptions[optionIndex].element.classList.remove('active-button');
 		}
-		
-		colorOptionSelected = 'drawingColorBool';
-		updateColorOptions();
+
+		updateColorOptions('drawingColorBool');
 	}
-}
+};
 
 //Assigns an Event Listener to buttons listed in colorOptions array
 const eventButton = (button, selectedName, eventType) => {
 	button.addEventListener(eventType, () => {
-		colorOptionSelected = selectedName;
-		updateColorOptions();
+		updateColorOptions(selectedName);
 	});
 };
 
@@ -307,8 +309,7 @@ resetGridButton.addEventListener('click', () => {
 		drawingColorSelector.value = '#000000';
 		backgroundFillSelector.value = '#FFFFFF';
 		backgroundColor = 'rgb(255, 255, 255)';
-		colorOptionSelected = 'drawingColorBool';
-		updateColorOptions();
+		updateColorOptions('drawingColorBool');
 		createGridChildren(gridNum);
 	} else {
 		alert('Response must be a number less than or equal to 100. Please try again.');
