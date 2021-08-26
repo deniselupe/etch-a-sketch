@@ -26,9 +26,9 @@ const colorOptions = [
 		value: true,
 		element: null,
 		colorRule: function() {
-			const hex = drawingColor.value;
-			colorChoice = changeVal.hexToRgb(hex);
+			colorChoice = changeVal.hexToRgb(drawingColor.value);
 			event.target.style.backgroundColor = colorChoice;
+			return event.target.style.backgroundColor;
 		}
 	},
 	{
@@ -37,6 +37,7 @@ const colorOptions = [
 		element: eraserButton,
 		colorRule: function() {
 			event.target.style.backgroundColor = backgroundColor;
+			return event.target.style.backgroundColor;
 		}
 	},
 	{
@@ -62,6 +63,7 @@ const colorOptions = [
 
 			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
 			event.target.style.backgroundColor = colorChoice;
+			return event.target.style.backgroundColor;
 		}
 	},
 	{
@@ -74,7 +76,7 @@ const colorOptions = [
 
 			currentRgbValues.forEach((oldValue) => {
 				if (oldValue < 5) oldValue = 50;
-				let newValue = Math.ceil(oldValue * (100 + 45) / 100);
+				const newValue = Math.ceil(oldValue * (100 + 45) / 100);
 
 				if (newValue < 255) {
 					newRgbValues.push(newValue);
@@ -85,6 +87,7 @@ const colorOptions = [
 
 			colorChoice = `rgb(${newRgbValues[0]}, ${newRgbValues[1]}, ${newRgbValues[2]})`;
 			event.target.style.backgroundColor = colorChoice;
+			return event.target.style.backgroundColor;
 		}
 	},
 	{
@@ -94,17 +97,18 @@ const colorOptions = [
 		colorRule: function() {
 			colorChoice = `hsl(${Math.ceil(Math.random() * 360)}, 100%, 50%)`;
 			event.target.style.backgroundColor = colorChoice;
+			return event.target.style.backgroundColor;
 		}
 	},
 ];
 
 //Methods to update or convert values
 const changeVal = {
-	rgbToArray(RgbValues) {
-		return RgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
+	rgbToArray(rgbValues) {
+		return rgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
 	},
 	rgbToHex(color, objectChanged) {
-		let currentRgbValues = changeVal.rgbToArray(color);
+		const currentRgbValues = changeVal.rgbToArray(color);
 		let hexValues = [];
 		
 		currentRgbValues.forEach((value) => {
@@ -115,8 +119,7 @@ const changeVal = {
 			hexValues.push(hex);
 		});
 
-		hexValues = hexValues.join('');
-		hexValues = `#${hexValues}`;
+		hexValues = `#${hexValues.join('')}`;
 		objectChanged.value = hexValues;
 	},
 	hexToRgb(hex) {
@@ -152,6 +155,13 @@ const changeVal = {
 	}
 };
 
+//Object Constructor for drawingInstance objects
+function undoEvent(index, originalColor, newColor) {
+	this.index = index;
+	this.originalColor = originalColor;
+	this.newColor = newColor;
+}
+
 //This function is what creates the grid
 const createGridChildren = function(squareAreaNumber) {
 	for (let i = 0; i < squareAreaNumber ** 2; i++) {
@@ -169,7 +179,7 @@ const createGridChildren = function(squareAreaNumber) {
 		item.addEventListener('mousedown', coloringRule);
 		item.addEventListener('mouseenter', coloringRule);
 	});
-}
+};
 
 //The rules for how each colorOptions button will color the grid
 const coloringRule = function(event) {
@@ -178,21 +188,22 @@ const coloringRule = function(event) {
 		changeVal.overrideUndo();
 	}
 
+	event.preventDefault();
 	const index = gridChildren.indexOf(event.target);
 	const duplicateChildTest = (child) => child.index === index;
 	const isChildDuplicate = drawingInstance.some(duplicateChildTest);
-	const childObj = {};
-	event.preventDefault();
+	const ruleIndex = colorOptions.findIndex((option) => option.value === true);
 
 	if (event.buttons === 1) {
-		const ruleIndex = colorOptions.findIndex((option) => option.value === true);
-		childObj.index = index;
-		childObj.originalColor = event.target.style.backgroundColor;
-		colorOptions[ruleIndex].colorRule();
-		childObj.newColor = event.target.style.backgroundColor;
-		if (isChildDuplicate === false) drawingInstance.push(childObj);
+		if (colorOptions[ruleIndex].name === 'colorPickerBool') {
+			colorOptions[ruleIndex].colorRule();
+		} else {
+			const gridSquareColor = event.target.style.backgroundColor;
+			const childObj = new undoEvent(index, gridSquareColor, colorOptions[ruleIndex].colorRule());
+			if (isChildDuplicate === false) drawingInstance.push(childObj);
+		}
 	}
-}
+};
 
 //Background Fill Color Input Listener
 backgroundFill.addEventListener('change', (event) => {
@@ -202,19 +213,16 @@ backgroundFill.addEventListener('change', (event) => {
 	
 	gridChildren.forEach((child, index) => {
 		if (child.style.backgroundColor === backgroundColor) {
-			const childObj = {};
-			childObj.index = index;
-			childObj.originalColor = child.style.backgroundColor;
-			child.style.backgroundColor = newBackgroundColor;
-			childObj.newColor = child.style.backgroundColor;
-			childObj.oldBackgroundFill = function (){
+			const childObj = new undoEvent(index, child.style.backgroundColor, newBackgroundColor);
+			childObj.oldFill = function (){
 				backgroundColor = childObj.originalColor;
 				changeVal.rgbToHex(childObj.originalColor, backgroundFill);
 			};
-			childObj.newBackgroundFill = function () {
+			childObj.newFill = function () {
 				backgroundColor = childObj.newColor;
 				changeVal.rgbToHex(childObj.newColor, backgroundFill);
 			};
+			child.style.backgroundColor = newBackgroundColor;
 			drawingInstance.push(childObj);
 		}
 	});
@@ -251,11 +259,8 @@ clearGridButton.addEventListener('click', () => {
 	
 	gridChildren.forEach((child, index) => {
 		if (child.style.backgroundColor !== backgroundColor) {
-			const childObj = {};
-			childObj.index = index;
-			childObj.originalColor = child.style.backgroundColor;
+			const childObj = new undoEvent(index, child.style.backgroundColor, backgroundColor);
 			child.style.backgroundColor = backgroundColor;
-			childObj.newColor = child.style.backgroundColor;
 			drawingInstance.push(childObj);
 		}
 	});
@@ -280,7 +285,7 @@ undoButton.addEventListener('click', () => {
 		historicalColoring[undoNumber].forEach((child) => {
 			gridChildren[child.index].style.backgroundColor = child.originalColor;
 			
-			if (child.oldBackgroundFill) child.oldBackgroundFill();
+			if (child.oldFill) child.oldFill();
 		});
 		
 		undoNumber = undoNumber + 1;
@@ -295,7 +300,7 @@ redoButton.addEventListener('click', () => {
 		historicalColoring[undoNumber].forEach((child) => {
 			gridChildren[child.index].style.backgroundColor = child.newColor;
 			
-			if (child.newBackgroundFill) child.newBackgroundFill();
+			if (child.newFill) child.newFill();
 		});
 	}
 });
@@ -330,17 +335,17 @@ const updateColorOptions = function (optionSelected) {
 };
 
 //Assigns an Event Listener to buttons listed in colorOptions array
-const eventButton = (button, selectedName, eventType) => {
+const eventButton = (button, eventType, selectedName) => {
 	button.addEventListener(eventType, () => {
 		updateColorOptions(selectedName);
 	});
 };
 
-eventButton(drawingColor, 'drawingColorBool', 'change');
-eventButton(eraserButton, 'eraserBool', 'click');
-eventButton(colorPickButton, 'colorPickerBool', 'click');
-eventButton(darkenButton, 'darkenBool', 'click');
-eventButton(lightenButton, 'lightenBool', 'click');
-eventButton(rgbButton, 'rgbBool', 'click');
+eventButton(drawingColor, 'change', 'drawingColorBool');
+eventButton(eraserButton, 'click', 'eraserBool');
+eventButton(colorPickButton, 'click', 'colorPickerBool');
+eventButton(darkenButton, 'click', 'darkenBool');
+eventButton(lightenButton, 'click', 'lightenBool');
+eventButton(rgbButton, 'click', 'rgbBool');
 
 createGridChildren(16);
