@@ -19,7 +19,7 @@ const lightenButton = document.getElementById('lighten-button');
 const rgbButton = document.getElementById('rgb-button');
 
 
-//Each object in colorOptions represents a button that changes drawing behavior
+// Each object in colorOptions represents a button that changes drawing behavior
 const colorOptions = [
 	{
 		name: 'drawingColorBool',
@@ -102,7 +102,7 @@ const colorOptions = [
 	},
 ];
 
-//Methods to update or convert values
+// Methods to update or convert values
 const changeVal = {
 	rgbToArray(rgbValues) {
 		return rgbValues.replace(/[^0-9]+/g, ' ').split(' ').splice(1, 3);
@@ -155,14 +155,14 @@ const changeVal = {
 	}
 };
 
-//Object Constructor for drawingInstance objects
+// Object Constructor for drawingInstance objects
 function undoEvent(index, originalColor, newColor) {
 	this.index = index;
 	this.originalColor = originalColor;
 	this.newColor = newColor;
 }
 
-//This function is what creates the grid
+// This function is what creates the grid
 const createGridChildren = function(squareAreaNumber) {
 	for (let i = 0; i < squareAreaNumber ** 2; i++) {
 		const gridChild = document.createElement('div');
@@ -181,7 +181,7 @@ const createGridChildren = function(squareAreaNumber) {
 	});
 };
 
-//The rules for how each colorOptions button will color the grid
+// The rules for how each colorOptions button will color grid squares
 const coloringRule = function(event) {
 	if (event.type === 'mousedown') {
 		changeVal.addUndo();
@@ -205,7 +205,7 @@ const coloringRule = function(event) {
 	}
 };
 
-//Background Fill Color Input Listener
+// Background Fill Color Input Listener
 backgroundFill.addEventListener('change', (event) => {
 	newBackgroundColor = changeVal.hexToRgb(backgroundFill.value);
 	changeVal.addUndo();
@@ -215,10 +215,12 @@ backgroundFill.addEventListener('change', (event) => {
 		if (child.style.backgroundColor === backgroundColor) {
 			const childObj = new undoEvent(index, child.style.backgroundColor, newBackgroundColor);
 			childObj.oldFill = function (){
+        // When undoing, reverse backgroundColor's value back to that of the predecessor background color
 				backgroundColor = childObj.originalColor;
 				changeVal.rgbToHex(childObj.originalColor, backgroundFill);
 			};
 			childObj.newFill = function () {
+        // When redoing, update backgroundColor's value back to that of the successor background color
 				backgroundColor = childObj.newColor;
 				changeVal.rgbToHex(childObj.newColor, backgroundFill);
 			};
@@ -230,7 +232,7 @@ backgroundFill.addEventListener('change', (event) => {
 	backgroundColor = newBackgroundColor;
 });
 
-//Reset Grid Button Listener
+// Reset Grid Button Listener
 resetGridButton.addEventListener('click', () => {
 	const gridNum = prompt('How many squares per side for the next grid?', '(Number must be less than or equal to 100)');
 	
@@ -252,7 +254,7 @@ resetGridButton.addEventListener('click', () => {
 	}
 });
 
-//Clear Grid Button Listener;
+// Clear Grid Button Listener;
 clearGridButton.addEventListener('click', () => {
 	changeVal.addUndo();
 	changeVal.overrideUndo();
@@ -266,7 +268,7 @@ clearGridButton.addEventListener('click', () => {
 	});
 });
 
-//Grid Lines Button Listener
+// Grid Lines Button Listener
 gridLinesButton.addEventListener('click', () => {
 	if (!gridParent.style.gap) {
 		gridParent.style.gap = '0px';
@@ -277,7 +279,7 @@ gridLinesButton.addEventListener('click', () => {
 	}
 });
 
-//Undo Button Listener
+// Undo Button Listener
 undoButton.addEventListener('click', () => {
 	changeVal.addUndo();
 	
@@ -292,7 +294,7 @@ undoButton.addEventListener('click', () => {
 	}
 });
 
-//Redo Button Listener
+// Redo Button Listener
 redoButton.addEventListener('click', () => {
 	if (undoNumber > 0) {
 		undoNumber = undoNumber - 1;
@@ -305,7 +307,7 @@ redoButton.addEventListener('click', () => {
 	}
 });
 
-//This function enables/disables grid color options
+// This function enables/disables grid color options
 const updateColorOptions = function (optionSelected) {
 	const optionIndex = colorOptions.findIndex((option) => option.name === optionSelected);
 	
@@ -334,7 +336,7 @@ const updateColorOptions = function (optionSelected) {
 	}
 };
 
-//Assigns an Event Listener to buttons listed in colorOptions array
+// A Factory method that provides event listener functionality for each button listed in colorOptions
 const eventButton = (button, eventType, selectedName) => {
 	button.addEventListener(eventType, () => {
 		updateColorOptions(selectedName);
